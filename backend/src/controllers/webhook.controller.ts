@@ -8,7 +8,11 @@ export const webhookController = {
     const signature = req.header("x-webhook-signature");
     webhookService.verifySignature(req.rawBody, signature);
 
-    const event = parseInput(webhookEventSchema, req.body);
+    const event = parseInput(webhookEventSchema, req.body) as {
+      messageId: string;
+      type: "opened" | "clicked";
+      timestamp?: string;
+    };
     const result = await webhookService.handleEvent(event);
 
     res.json({

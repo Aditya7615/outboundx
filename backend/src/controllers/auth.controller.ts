@@ -7,14 +7,14 @@ import { HttpError } from "../middlewares/error";
 
 export const authController = {
   async register(req: Request, res: Response): Promise<void> {
-    const input = parseInput(registerSchema, req.body);
+    const input = parseInput(registerSchema, req.body) as { name: string; email: string; password: string };
     const result = await authService.register(input);
     setAuthCookie(res, result.token);
     res.status(201).json({ data: result });
   },
 
   async login(req: Request, res: Response): Promise<void> {
-    const input = parseInput(loginSchema, req.body);
+    const input = parseInput(loginSchema, req.body) as { email: string; password: string };
     const result = await authService.login(input);
     setAuthCookie(res, result.token);
     res.json({ data: result });

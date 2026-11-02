@@ -85,6 +85,7 @@ export const webhookEventSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type WebhookEventInput = z.infer<typeof webhookEventSchema>;
 export type ContactCreateInput = z.infer<typeof contactCreateSchema>;
 export type ContactUpdateInput = z.infer<typeof contactUpdateSchema>;
 export type ContactListQuery = z.infer<typeof contactListQuerySchema>;
