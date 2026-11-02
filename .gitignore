@@ -38,3 +38,4 @@ Thumbs.db
 
 # Docker
 mysql-data/
+.vercel

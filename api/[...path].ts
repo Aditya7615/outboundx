@@ -1,3 +1,1 @@
-import { handler } from "./express";
-
-export default handler;
+export { default } from "./index";
