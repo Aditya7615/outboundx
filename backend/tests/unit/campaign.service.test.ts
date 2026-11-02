@@ -31,6 +31,7 @@ describe("CampaignService dispatch", () => {
         })
       },
       contact: {
+        count: jest.fn(async () => 2),
         findMany: jest.fn(async () => [
           { id: 10, email: "a@example.com" },
           { id: 11, email: "b@example.com" }
@@ -68,7 +69,7 @@ describe("CampaignService dispatch", () => {
         findFirst: jest.fn(async () => campaign({ status: "completed" })),
         update: jest.fn()
       },
-      contact: { findMany: jest.fn() },
+      contact: { count: jest.fn(async () => 0), findMany: jest.fn() },
       campaignLog: {
         findMany: jest.fn(),
         createMany: jest.fn(),
@@ -84,6 +85,30 @@ describe("CampaignService dispatch", () => {
     expect(provider.send).not.toHaveBeenCalled();
   });
 
+  it("rejects audiences above the dispatch limit", async () => {
+    const db = {
+      campaign: {
+        findFirst: jest.fn(async () => campaign()),
+        update: jest.fn()
+      },
+      contact: { count: jest.fn(async () => 5001), findMany: jest.fn() },
+      campaignLog: {
+        findMany: jest.fn(),
+        createMany: jest.fn(),
+        groupBy: jest.fn(async () => [])
+      }
+    } as unknown as PrismaClient;
+
+    const provider = { send: jest.fn() };
+    const service = new CampaignService(db, provider);
+
+    await expect(service.dispatch(7, 1)).rejects.toMatchObject({
+      status: 400,
+      message: "Campaign audience exceeds the 5000 recipient limit"
+    });
+    expect(provider.send).not.toHaveBeenCalled();
+  });
+
   it("excludes contacts that already received the campaign", async () => {
     const db = {
       campaign: {
@@ -94,6 +119,7 @@ describe("CampaignService dispatch", () => {
         })
       },
       contact: {
+        count: jest.fn(async () => 2),
         findMany: jest.fn(async () => [
           { id: 10, email: "a@example.com" },
           { id: 11, email: "b@example.com" }

@@ -2,8 +2,8 @@ import { ArrowUpRight, Check, Copy, KeyRound, UserRound, Webhook } from "lucide-
 import { PageHeader } from "../components/layout/PageHeader";
 import { Card, CardHeader } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-import { useAuth } from "../features/auth/AuthContext";
-import { useToast } from "../components/ui/Toast";
+import { useAuth } from "../features/auth/auth-context";
+import { useToast } from "../components/ui/toast-context";
 import { formatDate } from "../lib/format";
 
 const webhookSnippet = `POST /api/webhooks/email

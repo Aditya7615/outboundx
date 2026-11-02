@@ -55,6 +55,12 @@ npm run webhook:test -w backend -- opened
 npm run webhook:test -w backend -- clicked
 ```
 
+## Hosted deployment
+
+The production demo runs on Vercel with Aiven MySQL. Vercel builds the Vite frontend and exposes the Express app through `api/[...path].ts`. Since serverless functions cannot run the in-process scheduler, `.github/workflows/dispatch.yml` calls `POST /api/internal/dispatch-due` every five minutes using the `CRON_SECRET` repository secret.
+
+Required Vercel variables: `DATABASE_URL`, `JWT_SECRET`, `WEBHOOK_SECRET`, `CRON_SECRET`, `COOKIE_SECURE=true`, `CORS_ORIGIN`, and `LOG_LEVEL`. GitHub Actions also needs `APP_URL` and `CRON_SECRET`.
+
 `webhook:test` picks the newest campaign log with a provider message ID, signs a payload with `WEBHOOK_SECRET`, and posts it to the local API.
 
 ## Testing strategy

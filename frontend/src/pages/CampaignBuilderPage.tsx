@@ -6,7 +6,7 @@ import { PageHeader } from "../components/layout/PageHeader";
 import { Card, CardHeader } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Field, Input, Textarea } from "../components/ui/Input";
-import { useToast } from "../components/ui/Toast";
+import { useToast } from "../components/ui/toast-context";
 import { contactService } from "../services/contacts";
 import { campaignService } from "../services/campaigns";
 import type { Contact } from "../services/types";

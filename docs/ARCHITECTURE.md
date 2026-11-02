@@ -14,7 +14,7 @@ Controllers stay thin. Services own business rules and Prisma access so they can
 
 - `users` owns contacts and campaigns.
 - `contacts` are unique per user by email. Status is `active` or `unsubscribed`.
-- `campaigns` hold subject/content, audience status filter, lifecycle status, and dispatch timestamp.
+- `campaigns` hold subject/content, audience type and selected contact IDs, lifecycle status, and scheduling timestamps.
 - `campaign_logs` are the delivery ledger: one row per campaign/contact pair, unique by `(campaign_id, contact_id)` and by `provider_message_id`.
 
 Indexes exist for the actual access paths:
@@ -25,11 +25,11 @@ Indexes exist for the actual access paths:
 - `campaign_logs (campaign_id, sent_at)` for recent log pages.
 - Unique indexes on `users.email`, `contacts (user_id, email)`, and `campaign_logs.provider_message_id`.
 
-The schema uses `cuid()` identifiers for API objects and auto-increment IDs for log ordering. The latter gives a cheap, stable keyset cursor for delivery logs.
+All entities use auto-increment integer primary keys. `campaign_logs.id` doubles as a cheap, stable keyset cursor for delivery-log pages.
 
 ## Cursor pagination
 
-List endpoints accept `cursor` and `limit` (1-100, default 20). A cursor is the base64url encoding of a scope plus the last seen numeric ID. The query fetches `id < cursor`, orders descending, and requests `limit + 1` rows to determine `nextCursor`.
+List endpoints accept `cursor` and `limit` (1-100, default 25). A cursor is the base64url encoding of a scope plus the last seen numeric ID. The query fetches `id < cursor`, orders descending, and requests `limit + 1` rows to determine `nextCursor`.
 
 This avoids `OFFSET` scans, prevents duplicate rows when new contacts arrive between page loads, and keeps the API contract independent of total row count. Search and status filters are applied before the keyset predicate so the index can still be used.
 
@@ -49,9 +49,9 @@ A production system would move large imports to a queued job with progress repor
 ## Campaign dispatch
 
 1. `POST /campaigns/:id/dispatch` verifies ownership and that the campaign is `draft` or `scheduled`.
-2. The service counts matching active contacts and rejects empty audiences or more than 5,000 recipients.
+2. The service counts matching active contacts, rejects audiences above 5,000 recipients, and completes empty audiences without sending.
 3. Status moves to `sending` with `dispatchStartedAt`.
-4. Recipients are read in chunks. A worker pool of 20 sends through the provider interface and collects successes.
+4. Recipients are processed in batches of 20 through the provider interface, with each batch awaited before the next one starts.
 5. Logs are written in batches; then the campaign moves to `completed` with `sentAt` and `completedAt`.
 
 The long-running server polls every 30 seconds for `scheduled` campaigns that are due and runs the same dispatch service. On Vercel, a GitHub Actions job calls the protected `/api/internal/dispatch-due` endpoint every five minutes instead. Dispatch is intentionally single-instance for the demo. The provider interface is the seam where a real transactional email provider, retry policy, and idempotency key would live.
@@ -75,7 +75,7 @@ The update is conditional on the current status, so late or out-of-order events 
 - counts for sent, opened, clicked, and per-status breakdowns
 - open and click rates
 - a funnel (`sent -> opened -> clicked`)
-- a per-day series for the last 14 days
+- a per-day series for the selected 7, 30, or 90 day range
 - per-campaign performance for the dashboard table
 
 Counts use Prisma `groupBy`. The daily series uses one raw SQL aggregation grouped by date, avoiding a query per day and avoiding loading logs into Node.
@@ -94,7 +94,7 @@ Counts use Prisma `groupBy`. The daily series uses one raw SQL aggregation group
 - Passwords are hashed with bcrypt (cost 10 in the demo, higher in production).
 - JWTs are httpOnly, sameSite=lax, and `secure` when configured.
 - Zod validates every write payload; Prisma parameterizes queries.
-- Rate limits apply to auth and import routes.
+- Rate limits apply globally to the API, more tightly to auth, and separately to webhook traffic.
 - CORS is restricted to one configured origin.
 - Webhook signatures are verified before parsing, with constant-time comparison.
 - Secrets are never returned by the API; the settings page shows the integration contract, not the secret value.

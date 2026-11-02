@@ -13,7 +13,7 @@ import type {
   LogListQuery
 } from "../validation/schemas";
 import { emptyStats } from "../utils/mappers";
-import { chunk, decodeCursor } from "../utils/pagination";
+import { chunk, decodeCursor, encodeCursor } from "../utils/pagination";
 import { emailProvider, type EmailProvider } from "./email-provider.service";
 
 const MAX_DISPATCH_RECIPIENTS = 5000;
@@ -101,7 +101,7 @@ export class CampaignService {
     return {
       data: page.map((log) => this.toLogDto(log)),
       pageInfo: {
-        nextCursor: hasMore && last ? Buffer.from(`contact:${last.id}`).toString("base64url") : null,
+        nextCursor: hasMore && last ? encodeCursor(last.id) : null,
         hasMore,
         limit: query.limit
       }
@@ -231,14 +231,21 @@ export class CampaignService {
     }
 
     const audienceIds = this.audienceIds(campaign);
-    const contacts = await this.db.contact.findMany({
-      where: {
-        userId,
-        status: "active",
-        ...(audienceIds ? { id: { in: audienceIds } } : {})
-      },
-      take: MAX_DISPATCH_RECIPIENTS
-    });
+    const audienceWhere = {
+      userId,
+      status: "active" as const,
+      ...(audienceIds ? { id: { in: audienceIds } } : {})
+    };
+
+    const recipientCount = await this.db.contact.count({ where: audienceWhere });
+    if (recipientCount > MAX_DISPATCH_RECIPIENTS) {
+      throw new HttpError(
+        400,
+        `Campaign audience exceeds the ${MAX_DISPATCH_RECIPIENTS} recipient limit`
+      );
+    }
+
+    const contacts = await this.db.contact.findMany({ where: audienceWhere });
 
     if (!contacts.length) {
       await this.db.campaign.update({

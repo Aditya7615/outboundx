@@ -20,7 +20,7 @@ import { CampaignStatusBadge, LogStatusBadge } from "../components/ui/Badge";
 import { EmptyState } from "../components/ui/EmptyState";
 import { TableSkeleton } from "../components/ui/Skeleton";
 import { Modal } from "../components/ui/Modal";
-import { useToast } from "../components/ui/Toast";
+import { useToast } from "../components/ui/toast-context";
 import { campaignService } from "../services/campaigns";
 import { formatDateTime, formatNumber, formatPercent } from "../lib/format";
 import { ApiError } from "../services/api";

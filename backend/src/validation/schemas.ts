@@ -83,9 +83,23 @@ export const webhookEventSchema = z.object({
   timestamp: z.string().datetime({ offset: true }).optional()
 });
 
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
-export type WebhookEventInput = z.infer<typeof webhookEventSchema>;
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface WebhookEventInput {
+  messageId: string;
+  type: "opened" | "clicked";
+  timestamp?: string;
+}
+
 export type ContactCreateInput = z.infer<typeof contactCreateSchema>;
 export type ContactUpdateInput = z.infer<typeof contactUpdateSchema>;
 export type ContactListQuery = z.infer<typeof contactListQuerySchema>;

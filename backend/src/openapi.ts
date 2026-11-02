@@ -12,7 +12,8 @@ export const openApiDocument = {
     { name: "Contacts" },
     { name: "Campaigns" },
     { name: "Analytics" },
-    { name: "Webhooks" }
+    { name: "Webhooks" },
+    { name: "Internal" }
   ],
   components: {
     securitySchemes: {

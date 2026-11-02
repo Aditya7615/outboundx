@@ -6,7 +6,7 @@ import pino from "pino";
 import pinoHttp from "pino-http";
 import swaggerUi from "swagger-ui-express";
 import { env, isTest } from "./config/env";
-import { apiLimiter } from "./middlewares/rate-limit";
+import { apiLimiter, webhookLimiter } from "./middlewares/rate-limit";
 import { errorHandler, notFoundHandler } from "./middlewares/error";
 import { openApiDocument } from "./openapi";
 import { analyticsRouter } from "./routes/analytics.routes";
@@ -66,6 +66,7 @@ export function createApp() {
   });
 
   app.use("/health", healthRouter);
+  app.use("/api/health", healthRouter);
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument, {
     customSiteTitle: "OutboundX API docs",
     swaggerOptions: { persistAuthorization: true }
@@ -74,12 +75,12 @@ export function createApp() {
     res.json(openApiDocument);
   });
 
+  app.use("/api/webhooks", webhookLimiter, webhookRouter);
   app.use("/api", apiLimiter);
   app.use("/api/auth", authRouter);
   app.use("/api/contacts", contactRouter);
   app.use("/api/campaigns", campaignRouter);
   app.use("/api/analytics", analyticsRouter);
-  app.use("/api/webhooks", webhookRouter);
   app.use("/api/internal", internalRouter);
 
   app.use(notFoundHandler);

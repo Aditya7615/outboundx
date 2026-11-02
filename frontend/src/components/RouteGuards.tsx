@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth } from "../features/auth/auth-context";
 import { PageLoader } from "../components/ui/Spinner";
 
 export function ProtectedRoute() {

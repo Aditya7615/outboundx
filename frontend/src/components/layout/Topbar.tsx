@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, LogOut, Menu, Settings } from "lucide-react";
-import { useAuth } from "../../features/auth/AuthContext";
+import { useAuth } from "../../features/auth/auth-context";
 
 const labels: Record<string, string> = {
   dashboard: "Dashboard",

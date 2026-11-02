@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Send } from "lucide-react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./auth-context";
 import { ApiError } from "../../services/api";
 import { Button } from "../../components/ui/Button";
 import { Field, Input } from "../../components/ui/Input";

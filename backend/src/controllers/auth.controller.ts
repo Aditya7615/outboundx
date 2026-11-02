@@ -1,20 +1,20 @@
 import type { Request, Response } from "express";
 import { authService } from "../services/auth.service";
 import { parseInput } from "../middlewares/error";
-import { loginSchema, registerSchema } from "../validation/schemas";
+import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from "../validation/schemas";
 import { clearAuthCookie, setAuthCookie } from "../utils/cookies";
 import { HttpError } from "../middlewares/error";
 
 export const authController = {
   async register(req: Request, res: Response): Promise<void> {
-    const input = parseInput(registerSchema, req.body) as { name: string; email: string; password: string };
+    const input = parseInput(registerSchema, req.body) as RegisterInput;
     const result = await authService.register(input);
     setAuthCookie(res, result.token);
     res.status(201).json({ data: result });
   },
 
   async login(req: Request, res: Response): Promise<void> {
-    const input = parseInput(loginSchema, req.body) as { email: string; password: string };
+    const input = parseInput(loginSchema, req.body) as LoginInput;
     const result = await authService.login(input);
     setAuthCookie(res, result.token);
     res.json({ data: result });

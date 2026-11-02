@@ -1,30 +1,19 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode
-} from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import { cn } from "../../lib/cn";
+import {
+  ToastContext,
+  type ToastContextValue,
+  type ToastInput,
+  type ToastTone
+} from "./toast-context";
 
-type Tone = "success" | "error" | "info";
-
-interface Toast {
+interface Toast extends ToastInput {
   id: string;
-  title: string;
-  description?: string;
-  tone: Tone;
+  tone: ToastTone;
 }
 
-interface ToastContextValue {
-  toast: (input: { title: string; description?: string; tone?: Tone }) => void;
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-const toneStyles: Record<Tone, string> = {
+const toneStyles: Record<ToastTone, string> = {
   success: "border-green-200 bg-white",
   error: "border-red-200 bg-white",
   info: "border-slate-200 bg-white"
@@ -38,7 +27,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toast = useCallback<ToastContextValue["toast"]>(
-    ({ title, description, tone = "info" }) => {
+    (input) => {
+      const { title, description, tone = "info" } = input;
       const id = crypto.randomUUID();
       setToasts((current) => [...current, { id, title, description, tone }]);
       window.setTimeout(() => remove(id), 4500);
@@ -87,10 +77,4 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       </div>
     </ToastContext.Provider>
   );
-}
-
-export function useToast(): ToastContextValue {
-  const context = useContext(ToastContext);
-  if (!context) throw new Error("useToast must be used inside ToastProvider");
-  return context;
 }
