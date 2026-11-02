@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContactStatus {
+  active
+  unsubscribed
+}
+
+enum CampaignStatus {
+  draft
+  scheduled
+  sending
+  completed
+}
+
+enum LogStatus {
+  sent
+  opened
+  clicked
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(120)
+  email        String     @unique @db.VarChar(255)
+  passwordHash String     @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  contacts     Contact[]
+  campaigns    Campaign[]
+
+  @@map("users")
+}
+
+model Contact {
+  id        Int           @id @default(autoincrement())
+  userId    Int           @map("user_id")
+  email     String        @db.VarChar(255)
+  phone     String?       @db.VarChar(32)
+  firstName String?       @map("first_name") @db.VarChar(100)
+  lastName  String?       @map("last_name") @db.VarChar(100)
+  company   String?       @db.VarChar(150)
+  status    ContactStatus @default(active)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs      CampaignLog[]
+
+  @@unique([userId, email])
+  @@index([userId, id])
+  @@index([userId, status, id])
+  @@map("contacts")
+}
+
+model Campaign {
+  id                 Int            @id @default(autoincrement())
+  userId             Int            @map("user_id")
+  title              String         @db.VarChar(180)
+  content            String         @db.Text
+  status             CampaignStatus @default(draft)
+  audienceType       String         @default("all_active") @map("audience_type") @db.VarChar(32)
+  audienceContactIds Json?          @map("audience_contact_ids")
+  scheduledFor       DateTime?      @map("scheduled_for")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs               CampaignLog[]
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([status, scheduledFor])
+  @@map("campaigns")
+}
+
+model CampaignLog {
+  id                Int       @id @default(autoincrement())
+  campaignId        Int       @map("campaign_id")
+  contactId         Int       @map("contact_id")
+  status            LogStatus @default(sent)
+  providerMessageId String?   @unique @map("provider_message_id") @db.VarChar(120)
+  sentAt            DateTime  @default(now()) @map("sent_at")
+  openedAt          DateTime? @map("opened_at")
+  clickedAt         DateTime? @map("clicked_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  campaign          Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact           Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, contactId])
+  @@index([campaignId, status])
+  @@index([campaignId, sentAt])
+  @@index([contactId])
+  @@map("campaign_logs")
+}
