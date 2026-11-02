@@ -14,6 +14,7 @@ import { authRouter } from "./routes/auth.routes";
 import { campaignRouter } from "./routes/campaign.routes";
 import { contactRouter } from "./routes/contact.routes";
 import { healthRouter } from "./routes/health.routes";
+import { internalRouter } from "./routes/internal.routes";
 import { webhookRouter } from "./routes/webhook.routes";
 
 export function createApp() {
@@ -79,6 +80,7 @@ export function createApp() {
   app.use("/api/campaigns", campaignRouter);
   app.use("/api/analytics", analyticsRouter);
   app.use("/api/webhooks", webhookRouter);
+  app.use("/api/internal", internalRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

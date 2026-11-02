@@ -419,6 +419,26 @@ export const openApiDocument = {
         },
         responses: { "200": { description: "Event applied" }, "401": { description: "Bad signature" } }
       }
+    },
+    "/internal/dispatch-due": {
+      post: {
+        tags: ["Internal"],
+        security: [],
+        summary: "Dispatch due scheduled campaigns",
+        description: "Requires `Authorization: Bearer <CRON_SECRET>`. Invoked by the GitHub Actions scheduler.",
+        parameters: [
+          {
+            name: "Authorization",
+            in: "header",
+            required: true,
+            schema: { type: "string" }
+          }
+        ],
+        responses: {
+          "200": { description: "Dispatch run completed" },
+          "401": { description: "Invalid cron secret" }
+        }
+      }
     }
   }
 } as const;

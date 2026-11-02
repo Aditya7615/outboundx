@@ -41,6 +41,7 @@ services:
       CORS_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
       COOKIE_SECURE: "false"
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-local-webhook-secret-change-me}
+      CRON_SECRET: ${CRON_SECRET:-local-cron-secret-change-me}
       LOG_LEVEL: info
       SEED_DEMO: "true"
     ports:

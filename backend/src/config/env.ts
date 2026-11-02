@@ -15,6 +15,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   COOKIE_SECURE: booleanString.default("false"),
   WEBHOOK_SECRET: z.string().min(16).default("local-webhook-secret-change-me"),
+  CRON_SECRET: z.string().min(16).default("local-cron-secret-change-me"),
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info")
