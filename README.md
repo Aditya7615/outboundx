@@ -2,6 +2,9 @@
 
 A full-stack outbound marketing campaign manager for B2B teams: manage audiences, build campaigns, dispatch personalized email through a provider abstraction, and track engagement through signed webhooks.
 
+**Live demo:** https://outboundx-phi.vercel.app  
+Demo login: `demo@outboundx.dev` / `Demo@12345`
+
 Built as a portfolio project for the Outbox SDE Intern application, with an emphasis on the parts of the job that are easy to claim and harder to demonstrate: schema design and indexing, cursor pagination, streamed CSV ingestion, background dispatch, webhook security, typed API contracts, and tests.
 
 ## Stack
@@ -62,6 +65,16 @@ npm run dev
 
 Vite proxies `/api` and `/health` to the API, so the frontend uses same-origin requests in development and production.
 
+## Deployment
+
+The hosted demo runs the SPA and the Express API as a single Vercel project, backed by an Aiven MySQL service:
+
+- `vercel.json` builds the frontend and routes every `/api/*` request to `api/[...path].ts`, which invokes the same Express app used locally.
+- `GET /health` and `/api/docs` are served by the same function.
+- Because Vercel has no long-running process, `.github/workflows/dispatch.yml` invokes `POST /api/internal/dispatch-due` every five minutes with the `CRON_SECRET` bearer token. Docker Compose keeps the in-process 30-second scheduler.
+
+Required production environment variables: `DATABASE_URL`, `JWT_SECRET`, `WEBHOOK_SECRET`, `CRON_SECRET`, `COOKIE_SECURE=true`, `CORS_ORIGIN`, and `LOG_LEVEL`. GitHub Actions also needs `APP_URL` and `CRON_SECRET` repository secrets.
+
 ## Scripts
 
 | Command | Description |
@@ -119,6 +132,7 @@ All routes are under `/api` and return `{ "data": ... }`; errors return `{ "erro
 | POST | `/campaigns/:id/dispatch` | Send now |
 | GET | `/analytics/overview` | Dashboard aggregates |
 | POST | `/webhooks/email` | Provider events (HMAC signed) |
+| POST | `/internal/dispatch-due` | Cron-triggered dispatch (`CRON_SECRET` bearer) |
 | GET | `/api/docs`, `/api/openapi.json` | Swagger UI and OpenAPI spec |
 
 ## Testing
@@ -142,6 +156,7 @@ CI runs migration, seed, lint, typecheck, and tests against MySQL 8.4, plus fron
 | `CORS_ORIGIN` | Allowed web origin |
 | `COOKIE_SECURE` | Set `true` behind HTTPS |
 | `WEBHOOK_SECRET` | HMAC key for provider callbacks |
+| `CRON_SECRET` | Bearer secret for the serverless dispatch endpoint |
 | `SEED_DEMO` | Docker only; seed demo data on boot |
 
 ## Tradeoffs and next steps

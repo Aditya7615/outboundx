@@ -54,7 +54,7 @@ A production system would move large imports to a queued job with progress repor
 4. Recipients are read in chunks. A worker pool of 20 sends through the provider interface and collects successes.
 5. Logs are written in batches; then the campaign moves to `completed` with `sentAt` and `completedAt`.
 
-The scheduler polls every 30 seconds for `scheduled` campaigns whose `scheduledAt` is due and runs the same dispatch service. Dispatch is intentionally single-instance for the demo. The provider interface is the seam where a real transactional email provider, retry policy, and idempotency key would live.
+The long-running server polls every 30 seconds for `scheduled` campaigns that are due and runs the same dispatch service. On Vercel, a GitHub Actions job calls the protected `/api/internal/dispatch-due` endpoint every five minutes instead. Dispatch is intentionally single-instance for the demo. The provider interface is the seam where a real transactional email provider, retry policy, and idempotency key would live.
 
 ## Webhooks
 
