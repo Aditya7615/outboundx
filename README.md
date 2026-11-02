@@ -7,7 +7,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6)](https://www.typescriptlang.org/)
 
 **Live demo:** https://outboundx-phi.vercel.app  
-**Demo account:** `demo@outboundx.dev` / `Demo@12345`
+**Demo account:** `demo@outboundx.dev` / `Demo@12345`  
+**Demo video (4:25):** [Watch the full walkthrough](https://github.com/Aditya7615/outboundx/releases/download/demo-v1/OutboundX-Assignment-Demo.mp4)
+
+[![OutboundX demo thumbnail](https://github.com/Aditya7615/outboundx/releases/download/demo-v1/thumbnail.png)](https://github.com/Aditya7615/outboundx/releases/download/demo-v1/OutboundX-Assignment-Demo.mp4)
 
 ---
 
